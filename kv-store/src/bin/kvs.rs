@@ -1,9 +1,10 @@
 use clap::{App, Arg, SubCommand};
-use std::env;
+use kvs::{KvStore, KvStoreError, Result};
+use std::env::{current_dir, args};
 use std::process::exit;
 // use kvs::KvStore;
 
-fn main() {
+fn main() -> Result<()> {
     let matches = App::new(env!("CARGO_PKG_NAME"))
         .version(env!("CARGO_PKG_VERSION"))
         .arg(Arg::with_name("-V").help("print the version of package"))
@@ -30,20 +31,35 @@ fn main() {
         .get_matches();
 
     match matches.subcommand() {
-        ("set", Some(_args)) => {
-            eprintln!("unimplemented");
-            exit(1);
+        ("set", Some(args)) => {
+            let key = args.value_of("KEY").unwrap();
+            let value = args.value_of("VALUE").unwrap();
+            let mut store = KvStore::open(current_dir()?)?;
+            store.set(key.to_string(), value.to_string())?;
         }
-        ("get", Some(_args)) => {
-            eprintln!("unimplemented");
-            exit(1);
+        ("get", Some(args)) => {
+            let key = args.value_of("KEY").unwrap();
+            let mut store = KvStore::open(current_dir()?)?;
+            if let Some(value) = store.get(key.to_string())? {
+                println!("{value}");
+            } else {
+                println!("Key not found");
+            }
         }
-        ("rm", Some(_args)) => {
-            eprintln!("unimplemented");
-            exit(1);
+        ("rm", Some(args)) => {
+            let key = args.value_of("KEY").unwrap();
+            let mut store = KvStore::open(current_dir()?)?;
+            match store.remove(key.to_string()) {
+                Err(KvStoreError::RemoveNonExistKey) => {
+                    println!("Key not found");
+                    exit(1);
+                }
+                _ => {}
+            }
         }
         _ => {
             exit(1);
         }
     }
+    Ok(())
 }

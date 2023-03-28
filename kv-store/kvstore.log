@@ -1,0 +1,11 @@
+{
+  "Set": {
+    "key": "key1",
+    "value": "value1"
+  }
+}{
+  "Set": {
+    "key": "key2",
+    "value": "value2"
+  }
+}
