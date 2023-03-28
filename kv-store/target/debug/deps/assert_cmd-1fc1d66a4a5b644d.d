@@ -1,9 +1,0 @@
-/home/ubuntu18/rust_learning/code-for-talent-plan/kv-store/target/debug/deps/assert_cmd-1fc1d66a4a5b644d.rmeta: /home/ubuntu18/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/assert_cmd-0.11.1/src/lib.rs /home/ubuntu18/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/assert_cmd-0.11.1/src/assert.rs /home/ubuntu18/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/assert_cmd-0.11.1/src/cargo.rs /home/ubuntu18/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/assert_cmd-0.11.1/src/cmd.rs /home/ubuntu18/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/assert_cmd-0.11.1/src/stdin.rs
-
-/home/ubuntu18/rust_learning/code-for-talent-plan/kv-store/target/debug/deps/assert_cmd-1fc1d66a4a5b644d.d: /home/ubuntu18/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/assert_cmd-0.11.1/src/lib.rs /home/ubuntu18/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/assert_cmd-0.11.1/src/assert.rs /home/ubuntu18/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/assert_cmd-0.11.1/src/cargo.rs /home/ubuntu18/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/assert_cmd-0.11.1/src/cmd.rs /home/ubuntu18/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/assert_cmd-0.11.1/src/stdin.rs
-
-/home/ubuntu18/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/assert_cmd-0.11.1/src/lib.rs:
-/home/ubuntu18/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/assert_cmd-0.11.1/src/assert.rs:
-/home/ubuntu18/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/assert_cmd-0.11.1/src/cargo.rs:
-/home/ubuntu18/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/assert_cmd-0.11.1/src/cmd.rs:
-/home/ubuntu18/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/assert_cmd-0.11.1/src/stdin.rs:

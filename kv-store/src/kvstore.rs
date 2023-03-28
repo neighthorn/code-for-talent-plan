@@ -1,5 +1,4 @@
 use std::collections::BTreeMap;
-use std::env::current_dir;
 use std::io::{BufReader, BufWriter, Write, Seek, SeekFrom, Read};
 use std::path::PathBuf;
 use std::fs::{File, OpenOptions, remove_file, rename};
@@ -15,7 +14,6 @@ const COMPACT_THRESHOLD: u64 = 1024 * 1024;
 #[derive(Serialize, Deserialize)]
 pub enum Command {
     Set{key: String, value: String},
-    // Get{key: String},
     Rm{key: String},
 }
 
@@ -127,11 +125,8 @@ impl KvStore {
         //                 .open(path.clone())?;
         let mut index= BTreeMap::new();
         let offset = rebuild_index(&file, &mut index)?;
-        // println!("finish rebuild");
         file.seek(SeekFrom::End(0))?;
-        // println!("finish seek");
         let writer = BufWriter::new(file);
-        // println!("finish generating writer");
         Ok(KvStore { index, writer, path, dir, offset})
     }
 
@@ -191,7 +186,6 @@ impl KvStore {
 
 fn rebuild_index(file: &File, index: &mut BTreeMap<String, (u64, u64)>) -> Result<u64> {
     // deserialize the text in file
-    // println!("rebuild index");
     let mut stream = Deserializer::from_reader(file).into_iter::<Command>();
     let mut pos = 0;
     while let Some(cmd) = stream.next() {
@@ -205,7 +199,6 @@ fn rebuild_index(file: &File, index: &mut BTreeMap<String, (u64, u64)>) -> Resul
             }
         }
         pos = new_pos;
-        // println!("{pos}");
     }
     Ok(pos)
 }
