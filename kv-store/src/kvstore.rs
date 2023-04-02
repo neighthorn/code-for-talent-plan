@@ -6,7 +6,7 @@ use std::fs::{File, OpenOptions, remove_file, rename};
 use serde::{Serialize, Deserialize};
 use serde_json::Deserializer;
 
-use crate::{KvStoreError, Result};
+use crate::{KvStoreError, Result, KvEngine};
 
 const COMPACT_THRESHOLD: u64 = 1024 * 1024;
 
@@ -32,75 +32,6 @@ pub struct KvStore {
 }
 
 impl KvStore {
-    /// insert a key-value pair in KvStore
-    pub fn set(&mut self, key: String, value: String) -> Result<()> {
-        // construct set command
-        let cmd = Command::Set{ key, value };
-        // serialize the command to a string
-        let write_str = serde_json::to_string_pretty(&cmd)?;
-        // write command into the disk
-        let len = self.writer.write(write_str.as_bytes())?;
-        self.writer.flush()?;
-        // take the command offset in the file as value
-        let cmd_offset = self.offset;
-        // update the end offset of the file
-        self.offset += len as u64;
-        // update the in-memory index
-        if let Command::Set { key, .. } = cmd {
-            self.index.insert(key, (cmd_offset, len as u64));
-        }
-        if self.offset > COMPACT_THRESHOLD {
-            self.compact()?;
-        }
-        Ok(())
-    }
-    /// get the value for the given key
-    pub fn get(&self, key: String) -> Result<Option<String>> {
-        // get the offset of the latest command corresponds to key
-        let res = self.index.get(&key);
-        match res {
-            Some((pos, len)) => {
-                // make the pointer of the file to the command offset
-                let mut file = File::open(self.path.clone())?;
-                file.seek(SeekFrom::Start(*pos))?;
-                let reader = BufReader::new(file).take(*len);
-                // read command from the log file
-                if let Command::Set { value, .. } = serde_json::from_reader(reader)? {
-                    // return the value
-                    return Ok(Some(value));
-                } else {
-                    return Err(KvStoreError::GetNonExistValue);
-                }
-            },
-            None => {Ok(None)},
-        }
-    }
-    /// reomve the key-value pair with given key
-    pub fn remove(&mut self, key: String) -> Result<()> {
-        if self.index.contains_key(&key) {
-            // construct remove command
-            let cmd = Command::Rm { key };
-            // serialize the command to a string
-            let write_str = serde_json::to_string_pretty(&cmd)?;
-            // write command into the disk
-            let len = self.writer.write(write_str.as_bytes())?;
-            self.writer.flush()?;
-            // update the end offset of the file
-            self.offset += len as u64;
-            // update the in-memory index
-            if let Command::Rm { key } = cmd {
-                self.index.remove(&key);
-            }
-            if self.offset > COMPACT_THRESHOLD {
-                self.compact()?;
-            }
-            Ok(())
-        } else {
-            Err(KvStoreError::RemoveNonExistKey)
-        }
-        
-    }
-
     /// open the KvStore at a given path
     pub fn open(path: impl Into<PathBuf>) -> Result<KvStore> {
         // let file = OpenOptions::new()
@@ -201,4 +132,75 @@ fn rebuild_index(file: &File, index: &mut BTreeMap<String, (u64, u64)>) -> Resul
         pos = new_pos;
     }
     Ok(pos)
+}
+
+impl KvEngine for KvStore {
+    /// insert a key-value pair in KvStore
+    fn set(&mut self, key: String, value: String) -> Result<()> {
+        // construct set command
+        let cmd = Command::Set{ key, value };
+        // serialize the command to a string
+        let write_str = serde_json::to_string_pretty(&cmd)?;
+        // write command into the disk
+        let len = self.writer.write(write_str.as_bytes())?;
+        self.writer.flush()?;
+        // take the command offset in the file as value
+        let cmd_offset = self.offset;
+        // update the end offset of the file
+        self.offset += len as u64;
+        // update the in-memory index
+        if let Command::Set { key, .. } = cmd {
+            self.index.insert(key, (cmd_offset, len as u64));
+        }
+        if self.offset > COMPACT_THRESHOLD {
+            self.compact()?;
+        }
+        Ok(())
+    }
+    /// get the value for the given key
+    fn get(&self, key: String) -> Result<Option<String>> {
+        // get the offset of the latest command corresponds to key
+        let res = self.index.get(&key);
+        match res {
+            Some((pos, len)) => {
+                // make the pointer of the file to the command offset
+                let mut file = File::open(self.path.clone())?;
+                file.seek(SeekFrom::Start(*pos))?;
+                let reader = BufReader::new(file).take(*len);
+                // read command from the log file
+                if let Command::Set { value, .. } = serde_json::from_reader(reader)? {
+                    // return the value
+                    return Ok(Some(value));
+                } else {
+                    return Err(KvStoreError::GetNonExistValue);
+                }
+            },
+            None => {Ok(None)},
+        }
+    }
+    /// reomve the key-value pair with given key
+    fn remove(&mut self, key: String) -> Result<()> {
+        if self.index.contains_key(&key) {
+            // construct remove command
+            let cmd = Command::Rm { key };
+            // serialize the command to a string
+            let write_str = serde_json::to_string_pretty(&cmd)?;
+            // write command into the disk
+            let len = self.writer.write(write_str.as_bytes())?;
+            self.writer.flush()?;
+            // update the end offset of the file
+            self.offset += len as u64;
+            // update the in-memory index
+            if let Command::Rm { key } = cmd {
+                self.index.remove(&key);
+            }
+            if self.offset > COMPACT_THRESHOLD {
+                self.compact()?;
+            }
+            Ok(())
+        } else {
+            Err(KvStoreError::RemoveNonExistKey)
+        }
+        
+    }
 }

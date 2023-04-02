@@ -1,5 +1,5 @@
 use failure::Fail;
-use std::io;
+use std::{io, string::FromUtf8Error};
 
 /// Error type for KvStore
 #[derive(Fail, Debug)]
@@ -16,12 +16,24 @@ pub enum KvStoreError {
     /// fail to rebuild the in-memory index
     #[fail(display = "fail to rebuild the in-memory index")]
     RebuildIndexError,
+    /// wrong engine, try to use different engine than selected originally
+    #[fail(display = "wrong engine")]
+    WrongEngineError,
     /// io error
     #[fail(display = "io error: {}", _0)]
     Io(#[cause] io::Error),
     /// serde error
     #[fail(display = "serde error: {}", _0)]
     Serde(#[cause] serde_json::Error),
+    /// string error
+    #[fail(display = "{}", _0)]
+    StringErr(String),
+    /// sled error
+    #[fail(display = "{}", _0)]
+    Sled(#[cause] sled::Error),
+    /// utf8 error
+    #[fail(display = "{}", _0)]
+    Utf8Error(#[cause] FromUtf8Error),
 }
 
 impl From<io::Error> for KvStoreError {
@@ -33,6 +45,18 @@ impl From<io::Error> for KvStoreError {
 impl From<serde_json::Error> for KvStoreError {
     fn from(err: serde_json::Error) -> KvStoreError {
         KvStoreError::Serde(err)
+    }
+}
+
+impl From<sled::Error> for KvStoreError {
+    fn from(err: sled::Error) -> KvStoreError {
+        KvStoreError::Sled(err)
+    }
+}
+
+impl From<FromUtf8Error> for KvStoreError {
+    fn from(err: FromUtf8Error) -> KvStoreError {
+        KvStoreError::Utf8Error(err)
     }
 }
 
