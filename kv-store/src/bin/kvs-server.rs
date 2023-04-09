@@ -4,7 +4,7 @@ use log::info;
 use structopt::StructOpt;
 use std::fs;
 
-use kvs::{Result, KvStoreError, KvServer, KvStore, KvSledStore, KvEngine};
+use kvs::{Result, KvStoreError, KvServer, KvStore, KvEngine, thread_pool::SharedQueueThreadPool, thread_pool::ThreadPool};
 
 const DEFAULT_ENGINE: Engine = Engine::kvs;
 const ENGINE_META_PATH: &str = "engine.meta";
@@ -80,7 +80,7 @@ fn main() -> Result<()> {
             run_server(KvStore::open(path)?, opt.addr)?;
         },
         Engine::sled => {
-            run_server(KvSledStore::open(path)?, opt.addr)?;
+            run_server(KvStore::open(path)?, opt.addr)?;
         },
     }
     Ok(())
@@ -88,7 +88,8 @@ fn main() -> Result<()> {
 
 fn run_server<E: KvEngine>(engine: E, addr: SocketAddr) -> Result<()> {
     info!("run server");
-    let mut server = KvServer::new(addr, engine)?;
+    let thread_pool = SharedQueueThreadPool::new(4)?;
+    let mut server = KvServer::new(addr, engine, thread_pool)?;
     server.run()?;
     Ok(())
 }

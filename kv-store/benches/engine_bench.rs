@@ -1,5 +1,5 @@
 use criterion::{criterion_group, criterion_main, BatchSize, Criterion};
-use kvs::{KvStore, KvEngine, KvSledStore};
+use kvs::{KvStore, KvEngine};
 use rand::prelude::*;
 use sled;
 use tempfile::TempDir;
@@ -20,21 +20,6 @@ fn set_bench(c: &mut Criterion) {
             BatchSize::SmallInput,
         )
     });
-    group.bench_function("sled", |b| {
-        b.iter_batched(
-            || {
-                let temp_dir = TempDir::new().unwrap();
-                (KvSledStore::open(temp_dir.path()).unwrap(), temp_dir)
-            },
-            |(mut db, _temp_dir)| {
-                for i in 1..(1 << 12) {
-                    db.set(format!("key{}", i), "value".to_string()).unwrap();
-                }
-            },
-            BatchSize::SmallInput,
-        )
-    });
-    group.finish();
 }
 
 fn get_bench(c: &mut Criterion) {
@@ -53,20 +38,6 @@ fn get_bench(c: &mut Criterion) {
                 store
                     .get(format!("key{}", rng.gen_range(1, 1 << i)))
                     .unwrap();
-            })
-        });
-    }
-    for i in &vec![8, 12, 16, 20] {
-        group.bench_with_input(format!("sled_{}", i), i, |b, i| {
-            let temp_dir = TempDir::new().unwrap();
-            let mut db = KvSledStore::open(temp_dir.path()).unwrap();
-            for key_i in 1..(1 << i) {
-                db.set(format!("key{}", key_i), "value".to_string())
-                    .unwrap();
-            }
-            let mut rng = SmallRng::from_seed([0; 16]);
-            b.iter(|| {
-                db.get(format!("key{}", rng.gen_range(1, 1 << i))).unwrap();
             })
         });
     }

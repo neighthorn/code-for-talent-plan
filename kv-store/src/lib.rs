@@ -7,12 +7,12 @@ pub use client::KvClient;
 pub use server::KvServer;
 pub use common::Request;
 pub use kvengine::KvEngine;
-pub use kvsled::KvSledStore;
 
 mod client;
 mod server;
 mod kvstore;
-mod kvsled;
 mod error;
 mod common;
 mod kvengine;
+/// a trait to provide threadpool
+pub mod thread_pool;
